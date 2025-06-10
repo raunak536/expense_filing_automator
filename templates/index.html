@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auto Expense</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Auto-Expense</h1>
+
+    <form id="expense-form">
+        <div id="expense-rows">
+            <!-- One row inserted by default -->
+        </div>
+        <button type="button" onclick="addRow()">➕ Add Row</button>
+        <br><br>
+        <button type="button" onclick="showLogin()">📤 File Expense</button>
+    </form>
+
+    <!-- Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <h3>Enter Login Info</h3>
+            <label>Username: <input type="text" id="username"></label><br>
+            <label>Password: <input type="password" id="password"></label><br><br>
+            <button onclick="submitForm()">Submit</button>
+        </div>
+    </div>
+
+    <!-- Progress -->
+    <div id="progress" class="hidden">
+        <p>Filing expense... ⏳</p>
+        <progress id="bar" value="0" max="100"></progress>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

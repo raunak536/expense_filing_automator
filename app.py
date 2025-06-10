@@ -1,16 +1,84 @@
-"""
-Sprint 1:
-1. ocr_engine.py -> converts image to text (DONE; OCR cant read bill pictures)
-2. parser.py ->  detects date and amount from ocr output (DONE)
-3. automator.py -> logins to expense page, fills in date, casecode, amount etc
-4. app.py -> landing page for uploading pdf and doing 1,2,3
-5. deploy via render
-"""
+from flask import Flask, render_template, request, jsonify
+import time
+from automator import file_expense
+import re
 
-import ocr_engine
-import parser
+app = Flask(__name__)
 
-def file_expense(image_path):
-    ocr_text = ocr_engine.extract_text(image_path)
-    response = parser.parse_text(ocr_text)
-    print(response)
+def parse_expenses_from_request(request):
+    expense_rows = []
+
+    # Step 1: Figure out how many rows we have
+    row_ids = set()
+
+    for key in request.form.keys():
+        match = re.match(r"(case_code|reason|type)_(\d+)", key)
+        if match:
+            row_ids.add(match.group(2))
+
+    for row_id in sorted(row_ids, key=int):
+        row = {
+            "case_code": request.form.get(f"case_code_{row_id}", "").strip(),
+            "type": request.form.get(f"type_{row_id}", "").strip(),
+            "reason": request.form.get(f"reason_{row_id}", "").strip(),
+            "files": request.files.getlist(f"file_{row_id}")  # may be empty []
+        }
+        expense_rows.append(row)
+
+    return expense_rows
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@app.route("/credentials", methods=["GET"])
+def check_cached_credentials():
+    if cached_credentials:
+        return jsonify({"has_credentials": True})
+    else:
+        return jsonify({"has_credentials": False})
+
+cached_credentials = {}
+@app.route("/submit", methods=["POST"])
+def submit():
+    global cached_credentials
+    data = request.form
+    username = data.get("username")
+    password = data.get("password")
+
+    if username and password:
+        cached_credentials = {"username": username, "password": password}
+    elif cached_credentials:
+        username = cached_credentials["username"]
+        password = cached_credentials["password"]
+    else:
+        return jsonify({"error": "Credentials required"}), 400
+    print(cached_credentials)
+    expenses = parse_expenses_from_request(request)
+
+    script = f'''
+    delay 1
+    tell application "System Events"
+        keystroke "{username}"
+        keystroke tab
+        keystroke "{password}"
+        keystroke return
+    end tell
+    '''
+
+    with open("login.scpt", "w") as f:
+        f.write(script)
+
+    # Here’s where you call your automation logic
+    # You can pass parsed data and files to it
+    print("🔥 Running automation with for ", username)
+
+    file_expense(expenses)
+
+    time.sleep(3)  # simulate work
+    return jsonify({"status": "success", "message": "Expense filed!"})
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

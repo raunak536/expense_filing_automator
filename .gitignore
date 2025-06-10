@@ -3,3 +3,4 @@ __pycache__/
 expense_file/
 .env
 .idea
+login.scpt
