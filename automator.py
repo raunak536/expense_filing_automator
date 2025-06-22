@@ -21,6 +21,8 @@ from openai import OpenAI
 from dotenv import load_dotenv
 load_dotenv()
 import base64
+from pdf2image import convert_from_bytes
+import io
 
 def file_expense(expenses):
     options = Options()
@@ -36,13 +38,20 @@ def file_expense(expenses):
     #     image_data = base64.b64encode(image_file.read()).decode("utf-8")
     for row in expenses:
         for file in row['files']:
-            image_data = base64.b64encode(file.read()).decode("utf-8")
+            if file.content_type == "application/pdf":
+                pages = convert_from_bytes(file.read())
+                img_io = io.BytesIO()
+                pages[0].save(img_io, format="JPEG")
+                image_data = base64.b64encode(img_io.getvalue()).decode("utf-8")
+            else:
+                image_data = base64.b64encode(file.read()).decode("utf-8")
             # 2. Send it to GPT-4o
             response = client.responses.create(model="gpt-4o",
                                                input=[{"role": "user",
                                                        "content": [
                                                            {"type": "input_text",
                                                             "text": """Extract the total amount and the date from this receipt. 
+                                                            Make sure to remove Rs or any other currency symbol from the amount extracted as I will later convert it to a float.
                                                                     Respond **only** with a dict object so that I can directly use the output.
                                                                     Format of dictionary :
             
@@ -81,10 +90,10 @@ def file_expense(expenses):
             time.sleep(3)
             type_field = driver.switch_to.active_element
             type_field.send_keys(row['type'])
-            time.sleep(8)  # Just to let row settle
+            time.sleep(10)  # Just to let row settle
             print("✅ Type filled")
             type_field.send_keys(Keys.TAB)
-            time.sleep(2)  # Just to let row settle
+            time.sleep(5)  # Just to let row settle
             case_field = driver.switch_to.active_element
             case_field.send_keys(row['case_code'])
             time.sleep(3)  # Just to let row settle
@@ -96,7 +105,8 @@ def file_expense(expenses):
             time.sleep(2)  # Just to let row settle
             amount_field = driver.switch_to.active_element
             time.sleep(3)  # Just to let row settle
-            amount_field.send_keys(min(amount,750))
+            # amount_field.send_keys(min(amount,750))
+            amount_field.send_keys(amount)
             time.sleep(3)  # Just to let row settle
             print("✅ Amount filled")
             amount_field.send_keys(Keys.TAB)
@@ -118,14 +128,25 @@ def file_expense(expenses):
             file_input = driver.find_elements(By.XPATH, "//input[@ngf-select='grid.appScope.uploadReceipt($files, $invalidFiles,row.entity)']")
             # 2. Pass the temp path to Selenium for upload
             time.sleep(2)
-            file_input[-1].send_keys(convert_to_jpeg(file))
+            # file_input[-1].send_keys(convert_to_jpeg(file))
+            file_input[-1].send_keys(save_temp_file(file))
             time.sleep(5)
+            driver.execute_script("window.scrollTo(0, 0);")
+            time.sleep(2)
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         # file_input.send_keys("/Users/72625/Documents/general/expense_filing_automator/uploads/13jan_223.jpeg")
 
     # input("👀 Verify everything filled. Press Enter to close...")
 
     driver.quit()
     return
+
+def save_temp_file(filestorage):
+    """Save any file (image/pdf/etc) to a temporary path and return the path."""
+    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(filestorage.filename)[1]) as tmp:
+        filestorage.stream.seek(0)  # Always reset stream before read
+        tmp.write(filestorage.read())
+        return tmp.name
 
 def convert_to_jpeg(filestorage):
     # 1. Read file as image
