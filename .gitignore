@@ -4,3 +4,4 @@ expense_file/
 .env
 .idea
 login.scpt
+.DS_Store
