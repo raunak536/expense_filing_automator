@@ -1,9 +1,10 @@
 let rowCount = 0;
 const expenseTypes = [
-  "Meals - Late/OT @ Home",
+  "Meals - Late/OT @ Client/Office",
   "Meals - Business Travel"
 ];
 
+//add another row for expenses
 function addRow() {
   rowCount++;
   const row = document.createElement("div");
@@ -25,26 +26,7 @@ function addRow() {
 
   document.getElementById("expense-rows").appendChild(row);
 }
-
-//function addRow() {
-//    rowCount++;
-//    const row = document.createElement("div");
-//    row.className = "expense-row";
-//    row.innerHTML = `
-//        <span>${rowCount}</span>
-//        <input name="case_code_${rowCount}" placeholder="Case Code">
-//        <input name="type_${rowCount}" placeholder="Type">
-//        <input name="reason_${rowCount}" placeholder="Reason">
-//        <input type="file" name="file_${rowCount}" multiple>
-//    `;
-//    document.getElementById("expense-rows").appendChild(row);
-//}
-
-// show modal
-//function showLogin() {
-//    document.getElementById("login-modal").style.display = "block";
-//}
-
+//show login informatio 
 function showLogin() {
   fetch("/credentials")
     .then(res => res.json())

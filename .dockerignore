@@ -1,0 +1,9 @@
+uploads/
+__pycache__/
+expense_file/
+.env
+.idea
+login.scpt
+.gitignore
+.DS_Store
+Dockerfile

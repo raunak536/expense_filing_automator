@@ -5,6 +5,7 @@ import re
 
 app = Flask(__name__)
 
+# extract data from the request form
 def parse_expenses_from_request(request):
     expense_rows = []
 
@@ -27,11 +28,12 @@ def parse_expenses_from_request(request):
 
     return expense_rows
 
+# Show index page
 @app.route("/")
 def index():
     return render_template("index.html")
 
-
+# Caching user credentials
 @app.route("/credentials", methods=["GET"])
 def check_cached_credentials():
     if cached_credentials:
@@ -39,6 +41,7 @@ def check_cached_credentials():
     else:
         return jsonify({"has_credentials": False})
 
+# Submit expenses
 cached_credentials = {}
 @app.route("/submit", methods=["POST"])
 def submit():
@@ -54,7 +57,7 @@ def submit():
         password = cached_credentials["password"]
     else:
         return jsonify({"error": "Credentials required"}), 400
-    print(cached_credentials)
+
     expenses = parse_expenses_from_request(request)
 
     script = f'''
@@ -72,13 +75,14 @@ def submit():
 
     # Here’s where you call your automation logic
     # You can pass parsed data and files to it
-    print("🔥 Running automation with for ", username)
-
+    print("Running automation with for ", username)
+    tic = time.time()
     file_expense(expenses)
+    toc = time.time()
+    print(f"Automation for {username} ran for {(toc - tic)//60}min{(round(toc - tic))%60}sec!")
 
     time.sleep(3)  # simulate work
-    return jsonify({"status": "success", "message": "Expense filed!"})
-
+    return jsonify({"status": "success", "message": "Expense filed! Please check by logging into GoExpense"})
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001, debug=True)
