@@ -31,7 +31,7 @@ def file_expense(expenses):
     for row_enum, row in enumerate(expenses):
         # iterating through each bill uploaded in each row
         for file_enum, file in enumerate(row['files']):
-            print(f"\nFiling row #{row_enum+1} and bill # {file_enum+1} ......................")
+            print(f"\nFiling row #{row_enum+1} and bill # {file_enum+1}   ......................")
             # If bill uploaded in pdf; Assumes main bill is on first page of the PDF
             if file.content_type == "application/pdf":
                 pages = convert_from_bytes(file.read())
@@ -104,7 +104,7 @@ def file_expense(expenses):
                 time.sleep(3)  # Just to let row settle
                 case_field.send_keys(Keys.TAB)
                 time.sleep(2)  # Just to let row settle
-            except:
+            except Exception as e:
                 print(f"Error while filling in the case code field : {e}")
 
             # Filling in the filler code
@@ -112,7 +112,7 @@ def file_expense(expenses):
                 filler_field = driver.switch_to.active_element
                 filler_field.send_keys(Keys.TAB)
                 time.sleep(2)  # Just to let row settle
-            except:
+            except Exception as e:
                 print(f"Error while filling in the empty filler field : {e}")
             
             # Filling in the amount
@@ -124,7 +124,7 @@ def file_expense(expenses):
                 time.sleep(3)  # Just to let row settle
                 amount_field.send_keys(Keys.TAB)
                 time.sleep(3)
-            except:
+            except Exception as e:
                 print(f"Error while filling in the amount field : {e}")
             
             # Filling in the reason
@@ -137,7 +137,7 @@ def file_expense(expenses):
                     raise Exception(f"Incorrect type of expense : {row['type']}")
                 textarea[-1].send_keys(row['reason'])
                 time.sleep(3)
-            except:
+            except Exception as e:
                 print(f"Error while filling in the reason field : {e}")
 
             # Uploading the bill
@@ -155,7 +155,7 @@ def file_expense(expenses):
                 driver.execute_script("window.scrollTo(0, 0);") # clicking at a random spot to deselect
                 time.sleep(2)
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);") # clicking at a random spot to deselect
-            except:
+            except Exception as e:
                 print(f"Error while uploading the bill : {e}")
 
             print(f"Done!")
