@@ -4,7 +4,7 @@
 
 AutoExpense is a local web application that automates the process of filing expenses on the GoExpense platform.
 
-Using a Flask + React-style frontend, OpenAI’s GPT-4o for reading receipt images (including PDFs, PNGs, JPEGs), and Selenium to control Chrome, it simplifies expense submission into a drag-and-drop experience.
+Using a Flask backend + JS frontend, OpenAI’s GPT-4o for reading receipt images (including PDFs, PNGs, JPEGs), and Selenium to control Chrome, it simplifies expense submission into a drag-and-drop experience.
 
 You fill in the form, upload your receipts, click **File Expense**, and the app takes care of the rest — including logging into GoExpense and filling out the form automatically through your browser.
 
@@ -19,34 +19,43 @@ You fill in the form, upload your receipts, click **File Expense**, and the app 
 - Files expenses using actual Chrome browser via Selenium  
 - Fully offline after start (your data stays on your machine)  
 
+▶ [Watch the walkthrough video](https://youtu.be/SbP1NK1FU4o)
+
 ---
 
 ## How to Use
 
-### Step 1: Pull the Docker Image
+### Step 1: Clone the github repo
 
+Run in terminal : 
 ```bash
-docker pull rkaushik302/expense_file_automate:v0
+git clone https://github.com/raunak536/expense_filing_automator.git
+cd expense_filing_automator
 ```
 
 ---
 
-### Step 2: Run the Container
+### Step 2: Create python env, install packages, store openai key
 
-Replace `<HOST_PORT>` with any open local port (e.g. `5000`) and insert your OpenAI API key.
-
+Run in terminal : 
 ```bash
-docker run -p <HOST_PORT>:5001 -e OPENAI_API_KEY="your-openai-api-key" rkaushik302/expense_file_automate:v0
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+echo 'OPENAI_API_KEY="insert_your_key_here"' > .env
 ```
-
 ---
 
-### Step 3: Open the App in Your Browser
+### Step 3: Run the app and open it in Your Browser
+
+Run in terminal : 
+```bash
+python app.py
+```
 
 Go to:
-
 ```
-http://127.0.0.1:<HOST_PORT>
+http://127.0.0.1:5001
 ```
 
 ---
@@ -79,7 +88,7 @@ Expense filed! Please check by logging into GoExpense.
 
 ## Important Note for Mac Users
 
-To allow automation to work correctly, you must grant permission to the app running Docker to control Chrome:
+To allow automation to work correctly, you must grant permission to the app to control Chrome:
 
 - Go to:  
   `System Settings > Privacy & Security > Automation`  
